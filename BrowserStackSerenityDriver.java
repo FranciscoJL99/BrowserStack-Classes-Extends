@@ -11,7 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class BrowserStackSerenityDriver implements DriverSource {
-    private static final Logger LOGGER = Logger.getLogger(BrowserStackSerenityDriver.class.getName() );
+      private static final Logger LOGGER = Logger.getLogger(BrowserStackSerenityDriver.class.getName() );
 
     public WebDriver newDriver() {
         EnvironmentVariables environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
@@ -32,7 +32,7 @@ public class BrowserStackSerenityDriver implements DriverSource {
         String environment = System.getProperty("environment");
         DesiredCapabilities capabilities = new DesiredCapabilities();
 
-        if(!environment.contains("_") && !environment.equals("single")){
+        if(!environment.contains("_") && environment.equals("parallel")){
             Integer maxForks = Integer.valueOf(System.getProperty("serenity.fork.count"));
             Integer worker = Integer.valueOf(System.getProperty("org.gradle.test.worker"));
             int index = (worker % maxForks) + 1;
