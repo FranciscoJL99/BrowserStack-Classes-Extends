@@ -1,5 +1,3 @@
-package runner;
-
 import net.thucydides.core.util.EnvironmentVariables;
 import net.thucydides.core.util.SystemEnvironmentVariables;
 import net.thucydides.core.webdriver.DriverSource;
@@ -34,10 +32,12 @@ public class BrowserStackSerenityDriver implements DriverSource {
         String environment = System.getProperty("environment");
         DesiredCapabilities capabilities = new DesiredCapabilities();
 
-        Integer maxForks = Integer.valueOf(System.getProperty("serenity.fork.count", "3"));
-        Integer worker = Integer.valueOf(System.getProperty("org.gradle.test.worker", "3"));
-        int index = (worker % maxForks) + 1;
-
+        if(!environment.contains("_") && !environment.equals("single")){
+            Integer maxForks = Integer.valueOf(System.getProperty("serenity.fork.count"));
+            Integer worker = Integer.valueOf(System.getProperty("org.gradle.test.worker"));
+            int index = (worker % maxForks) + 1;
+            environment = environment + "_"+index;
+        }
         Iterator<String> it = environmentVariables.getKeys().iterator();
         while (it.hasNext()) {
             String key = it.next();
@@ -52,19 +52,15 @@ public class BrowserStackSerenityDriver implements DriverSource {
                         && environmentVariables.getProperty(key).equalsIgnoreCase("true")) {
                     System.setProperty("browserstack.local", "true");
                 }
-            } else if (environment != null && key.startsWith("environment." + environment)) {
+            } else if (key.startsWith("environment." + environment)) {
 
-
-                if(!environment.equals("single") && !key.startsWith("environment." + environment + "_"+index)){
+                if(!key.startsWith("environment." + environment)){
                     LOGGER.log(Level.INFO,  "Capabilitie omitida");
                     continue;
                 }
-                if(environment.equals("single")){
+                System.out.println(environment + " " + environmentVariables.getProperty(key));
                     capabilities.setCapability(key.replace("environment." + environment +".", ""), environmentVariables.getProperty(key));
-                }
-                else{
-                    capabilities.setCapability(key.replace("environment." + environment + "_"+index+".", ""), environmentVariables.getProperty(key));
-                }
+
                 if (key.equals("environment." + environment + ".browserstack.local")
                         && environmentVariables.getProperty(key).equalsIgnoreCase("true")) {
                     System.setProperty("browserstack.local", "true");
