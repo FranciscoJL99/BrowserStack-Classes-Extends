@@ -1,5 +1,3 @@
-package runner;
-
 import com.browserstack.local.Local;
 import net.thucydides.core.util.EnvironmentVariables;
 import net.thucydides.core.util.SystemEnvironmentVariables;
