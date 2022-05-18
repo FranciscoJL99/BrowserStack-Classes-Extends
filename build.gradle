@@ -1,0 +1,103 @@
+apply plugin: 'java-library'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+
+}
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+
+    }
+    ext{
+        serenityVersion = '2.1.0'
+        serenityCucumberVersion = '1.9.48'
+        lombok = '1.8.20'
+        slf4j = '1.7.7'
+    }
+
+}
+dependencies{
+    implementation group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
+
+    testImplementation "net.serenity-bdd:serenity-core:$rootProject.ext.serenityVersion"
+    testImplementation "net.serenity-bdd:serenity-junit:$rootProject.ext.serenityVersion"
+    implementation "net.serenity-bdd:serenity-screenplay:$rootProject.ext.serenityVersion"
+    implementation "net.serenity-bdd:serenity-cucumber:$rootProject.ext.serenityCucumberVersion"
+
+    compileOnly "org.projectlombok:lombok:$rootProject.ext.lombok"
+    annotationProcessor "org.projectlombok:lombok:$rootProject.ext.lombok"
+    testCompileOnly "org.projectlombok:lombok:$rootProject.ext.lombok"
+    testAnnotationProcessor "org.projectlombok:$rootProject.ext.lombok"
+
+    testImplementation "org.slf4j:slf4j-simple:$rootProject.ext.slf4j"
+    testImplementation "org.slf4j:slf4j-simple:$rootProject.ext.slf4j"
+
+    implementation group: 'com.browserstack', name: 'browserstack-local-java', version: '1.0.6'
+
+}
+
+
+test {
+    systemProperty 'environment', System.getProperty("environment") ?: "single"
+    println "# test environment: " + systemProperties['environment']
+    if (systemProperties['environment']=="single") {
+        include '**/TestRunner.class'
+      //  include '**/AutomationPractice.class'
+
+    }
+    else{
+    systemProperty "threadCount", "5"
+    systemProperties['environment']
+
+    List<String> runners = file('src/test/java/runner').listFiles()
+            .collect { it.name }
+            .findAll { it =~ 'RunnerParallel*' }
+            .collect { it.take(it.lastIndexOf('.')) }
+        println "# Runner: " + runners.size()
+
+    maxParallelForks = System.properties.'serenity.fork.count' as Integer ?: 5
+    maxParallelForks = [maxParallelForks, runners.size()].min()
+    systemProperty 'serenity.fork.count', maxParallelForks
+    maxParallelForks.times { filter.includeTestsMatching runners[it] }
+    }
+    testLogging.showStandardStreams = true
+    testLogging.exceptionFormat = 'full'
+    ignoreFailures = true
+}
+//task parallel(type: Test){
+//systemProperty "threadCount", "5"
+//    systemProperty "environment", "parallel"
+//
+//List<String> runners = file('src/test/java/runner').listFiles()
+//        .collect { it.name }
+//        .findAll { it =~ 'RunnerParallel*' }
+//        .collect { it.take(it.lastIndexOf('.')) }
+//println "# Runner: " + runners.size()
+//
+//maxParallelForks = System.properties.'serenity.fork.count' as Integer ?: 5
+//maxParallelForks = [maxParallelForks, runners.size()].min()
+//systemProperty 'serenity.fork.count', maxParallelForks
+//maxParallelForks.times { filter.includeTestsMatching runners[it] }
+//    testLogging.showStandardStreams = true
+//    testLogging.exceptionFormat = 'full'
+//    ignoreFailures = true
+//}
+//
+//task single(type: test){
+//    systemProperty "environment", "single"
+//    include '**/TestRunner.class'
+//    ignoreFailures = true
+//    testLogging.showStandardStreams = true
+//    testLogging.exceptionFormat = 'full'
+//    ignoreFailures = true
+//
+//}
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+gradle.startParameter.continueOnFailure = true
