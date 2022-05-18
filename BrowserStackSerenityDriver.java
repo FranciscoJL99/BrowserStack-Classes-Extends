@@ -58,8 +58,7 @@ public class BrowserStackSerenityDriver implements DriverSource {
                     LOGGER.log(Level.INFO,  "Capabilitie omitida");
                     continue;
                 }
-                System.out.println(environment + " " + environmentVariables.getProperty(key));
-                    capabilities.setCapability(key.replace("environment." + environment +".", ""), environmentVariables.getProperty(key));
+                capabilities.setCapability(key.replace("environment." + environment +".", ""), environmentVariables.getProperty(key));
 
                 if (key.equals("environment." + environment + ".browserstack.local")
                         && environmentVariables.getProperty(key).equalsIgnoreCase("true")) {
